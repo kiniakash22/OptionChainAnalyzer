@@ -210,3 +210,5 @@ else:
 print(f"Script: {script} and Strikes: {strikes}")
 oca_nifty = OptionChainAnalyzer(script, strikes)
 oca_nifty.analyze_option_chain_data()
+
+print(f"Script took {round((datetime.datetime.now() - start_time).total_seconds() * 1000, 2)} ms")
