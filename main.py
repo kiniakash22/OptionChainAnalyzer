@@ -99,8 +99,8 @@ class OptionChainAnalyzer:
         folder_name = start_time.strftime("%Y-%m-%d")
         json_file_name = start_time.strftime("%H_%M")+"_data"
 
-        if not os.path.isdir(self.script):
-            os.makedirs(self.script)
+        if not os.path.isdir(f"{self.script}_data"):
+            os.makedirs(f"{self.script}_data")
         if not os.path.isdir(f"{self.script}_data/{folder_name}"):
             os.makedirs(f"{self.script}_data/{folder_name}")
 
