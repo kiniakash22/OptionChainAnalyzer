@@ -1,9 +1,9 @@
 import requests
 import datetime
 import json
-import os
 from prettytable import PrettyTable
 import sys
+import os
 
 
 UPDATE_FREQ = 0.01
@@ -168,6 +168,18 @@ class OptionChainAnalyzer:
             self.previous_data = self.read_from_json(self.last_two_files[1])
             self.compare_latest_oc_data_with_prev()
 
+    def set_color(self, value):
+        # Color
+        RED = "\033[0;31;40m"  # RED
+        GREEN = "\033[0;32;40m"  # GREEN
+        END = "\033[0m"  # Reset
+
+        if value < 0:
+            value = f"{RED}{value:+} %{END}"
+        else:
+            value = f"{GREEN}{value:+} %{END}"
+        return value
+
     def compare_latest_oc_data_with_prev(self):
         pt = PrettyTable()
         h, m, _ = self.last_two_files[1].split("/")[-1].split("_")
@@ -190,7 +202,8 @@ class OptionChainAnalyzer:
             PE_OI_CHANGE = self.previous_data[self.current_weekly_exp_date][strike]['PE']['oi']
             if strike == str(self.rounded_spot_cmp):
                 strike = "> " + strike + " <"
-            pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  f"{CE_OI_CHANGE_PREV_PER:+} %", strike, f"{PE_OI_CHANGE_PREV_PER:+} %",  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
+            # pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  f"{CE_OI_CHANGE_PREV_PER:+} %", strike, f"{PE_OI_CHANGE_PREV_PER:+} %",  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
+            pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  self.set_color(CE_OI_CHANGE_PREV_PER), strike, self.set_color(PE_OI_CHANGE_PREV_PER),  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
         print(pt)
 
 
