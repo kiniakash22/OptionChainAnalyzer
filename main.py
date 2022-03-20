@@ -190,7 +190,7 @@ class OptionChainAnalyzer:
             PE_OI_CHANGE = self.previous_data[self.current_weekly_exp_date][strike]['PE']['oi']
             if strike == str(self.rounded_spot_cmp):
                 strike = "> " + strike + " <"
-            pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  CE_OI_CHANGE_PREV_PER, strike, PE_OI_CHANGE_PREV_PER,  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
+            pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  f"{CE_OI_CHANGE_PREV_PER:+} %", strike, f"{PE_OI_CHANGE_PREV_PER:+} %",  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
         print(pt)
 
 
