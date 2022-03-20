@@ -130,7 +130,7 @@ class OptionChainAnalyzer:
         self.min_strike = self.rounded_spot_cmp - (self.strike_diff * self.strikes)
         self.max_strike = self.rounded_spot_cmp + (self.strike_diff * self.strikes)
         self.option_chain_json = self.get_option_chain()
-        print(f"{start_time.strftime('%Y-%m-%d')}: Fetched Option chain for '{self.script}' for Expiry '{self.current_weekly_exp_date}' and the Strike Range: {self.min_strike} - {self.max_strike}")
+        print(f"Fetched Option chain for '{self.script}' for Expiry '{self.current_weekly_exp_date}' and the Strike Range ({self.strikes}): {self.min_strike} - {self.max_strike}")
         self.get_last_update()
 
     def get_last_update(self):
@@ -168,16 +168,20 @@ class OptionChainAnalyzer:
             self.previous_data = self.read_from_json(self.last_two_files[1])
             self.compare_latest_oc_data_with_prev()
 
-    def set_color(self, value):
+    def set_color(self, value, percentage=False):
         # Color
         RED = "\033[0;31;40m"  # RED
         GREEN = "\033[0;32;40m"  # GREEN
+        YELLOW = "\033[0;33;40m"  # YELLO
         END = "\033[0m"  # Reset
 
-        if value < 0:
-            value = f"{RED}{value:+} %{END}"
+        if percentage:
+            if value < 0:
+                value = f"{RED}{value:+} %{END}"
+            else:
+                value = f"{GREEN}{value:+} %{END}"
         else:
-            value = f"{GREEN}{value:+} %{END}"
+            value = f"{YELLOW}{value}{END}"
         return value
 
     def compare_latest_oc_data_with_prev(self):
@@ -186,7 +190,7 @@ class OptionChainAnalyzer:
         prev_time = f"{h}:{m}"
         h, m, _ = self.last_two_files[0].split("/")[-1].split("_")
         curr_time = f"{h}:{m}"
-        pt.field_names = [f"CE OI PREV ({prev_time})", f"CE OI ({curr_time})", "CE OI CHANGE", "CE OI CHANGE (%)", "STRIKE", "PE OI CHANGE (%)", "PE OI CHANGE", f"PE OI ({curr_time})", f"PE OI PREV ({prev_time})"]
+        pt.field_names = [f"CE OI PREV ({prev_time})", f"CE OI ({curr_time})", "CE OI CHANGE", "CE OI CHANGE (%)", f"STRIKE ({self.set_color(self.script)})", "PE OI CHANGE (%)", "PE OI CHANGE", f"PE OI ({curr_time})", f"PE OI PREV ({prev_time})"]
         for strike, strike_data in self.current_data[self.current_weekly_exp_date].items():
             if strike not in self.previous_data[self.current_weekly_exp_date].keys():
                 continue
@@ -201,9 +205,9 @@ class OptionChainAnalyzer:
             PE_OI = strike_data['PE']['oi']
             PE_OI_CHANGE = self.previous_data[self.current_weekly_exp_date][strike]['PE']['oi']
             if strike == str(self.rounded_spot_cmp):
-                strike = "> " + strike + " <"
+                strike = "> " + self.set_color(strike) + " <"
             # pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  f"{CE_OI_CHANGE_PREV_PER:+} %", strike, f"{PE_OI_CHANGE_PREV_PER:+} %",  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
-            pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  self.set_color(CE_OI_CHANGE_PREV_PER), strike, self.set_color(PE_OI_CHANGE_PREV_PER),  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
+            pt.add_row([CE_OI_PREV/1000, CE_OI/1000,  CE_OI_CHANGE_PREV/1000,  self.set_color(CE_OI_CHANGE_PREV_PER, True), strike, self.set_color(PE_OI_CHANGE_PREV_PER, True),  PE_OI_CHANGE_PREV/1000,  PE_OI/1000,  PE_OI_CHANGE/1000])
         print(pt)
 
 
@@ -216,11 +220,10 @@ if (len(sys.argv) == 3):
     script = sys.argv[1]
     strikes = int(sys.argv[2])
 else:
-    print("Not all required parameter are passed. Using default values.")
+    print("Not all required parameter are passed. Using default values (Script = 'NIFTY' and No. of strikes = '10').")
     script = "NIFTY"
     strikes = 10
 
-print(f"Script: {script} and Strikes: {strikes}")
 oca_nifty = OptionChainAnalyzer(script, strikes)
 oca_nifty.analyze_option_chain_data()
 
